@@ -72,9 +72,6 @@ resource "azurerm_network_security_group" "backend_nsg" {
   }
 }
 
-# -------------------------
-# Associate NSGs with subnets
-# -------------------------
 resource "azurerm_subnet_network_security_group_association" "frontend_assoc" {
   subnet_id                 = azurerm_subnet.subnet_public.id
   network_security_group_id = azurerm_network_security_group.public_nsg.id

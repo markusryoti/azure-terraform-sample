@@ -29,3 +29,16 @@ module "acr" {
   resource_group_name = azurerm_resource_group.cloud_resources.name
   location            = azurerm_resource_group.cloud_resources.location
 }
+
+module "containerapps_env" {
+  source              = "../../modules/containerapps-env"
+  resource_group_name = azurerm_resource_group.cloud_resources.name
+  location            = azurerm_resource_group.cloud_resources.location
+  subnet_id           = module.network.backend_subnet_id
+}
+
+module "nginx_app" {
+  source              = "../../modules/containerapp"
+  capp_environment_id = module.containerapps_env.container_apps_env_id
+  resource_group_name = azurerm_resource_group.cloud_resources.name
+}

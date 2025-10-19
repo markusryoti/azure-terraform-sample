@@ -1,6 +1,7 @@
-resource "azurerm_resource_provider_registration" "network_registration" {
-  name = "Microsoft.Network"
-}
+# Not needed if the Resource Provider is already registered for the subscription
+# resource "azurerm_resource_provider_registration" "network_registration" {
+#   name = "Microsoft.Network"
+# }
 
 resource "azurerm_virtual_network" "cloud_network" {
   name                = "cloud-network"
@@ -8,14 +9,17 @@ resource "azurerm_virtual_network" "cloud_network" {
   location            = var.location
   address_space       = ["10.0.0.0/16"]
 
-  depends_on = [azurerm_resource_provider_registration.network_registration]
+  # # Uncomment the line below if Resource Provider registration is needed
+  #   depends_on = [azurerm_resource_provider_registration.network_registration]
 }
 
 resource "azurerm_subnet" "subnet_public" {
   name                 = "subnet-public"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.cloud_network.name
-  address_prefixes     = ["10.0.1.0/24"]
+
+  # 10.0.0.0 - 10.0.7.255
+  address_prefixes = ["10.0.0.0/21"]
 }
 
 # Public IP
@@ -31,7 +35,20 @@ resource "azurerm_subnet" "subnet_backend" {
   name                 = "subnet-backend"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.cloud_network.name
-  address_prefixes     = ["10.0.2.0/24"]
+
+  # 10.0.8.0 - 10.0.15.255
+  address_prefixes = ["10.0.8.0/21"]
+
+  delegation {
+    name = "delegation"
+
+    service_delegation {
+      name = "Microsoft.App/environments"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+      ]
+    }
+  }
 }
 
 # NAT
@@ -59,4 +76,12 @@ resource "azurerm_subnet_nat_gateway_association" "backend_nat_assoc" {
 resource "azurerm_nat_gateway_public_ip_association" "nat_public_ip_assoc" {
   nat_gateway_id       = azurerm_nat_gateway.natgw.id
   public_ip_address_id = azurerm_public_ip.nat_ip.id
+}
+
+output "public_subnet_id" {
+  value = azurerm_subnet.subnet_public.id
+}
+
+output "backend_subnet_id" {
+  value = azurerm_subnet.subnet_backend.id
 }

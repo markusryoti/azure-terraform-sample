@@ -1,6 +1,6 @@
-resource "azurerm_resource_provider_registration" "acr_registration" {
-  name = "Microsoft.ContainerRegistry"
-}
+# resource "azurerm_resource_provider_registration" "acr_registration" {
+#   name = "Microsoft.ContainerRegistry"
+# }
 
 resource "azurerm_container_registry" "acr" {
   name                = "markusRyotiContainerRegistry"
@@ -9,5 +9,5 @@ resource "azurerm_container_registry" "acr" {
   sku                 = "Basic"
   admin_enabled       = false
 
-  depends_on = [azurerm_resource_provider_registration.acr_registration]
+  #   depends_on = [azurerm_resource_provider_registration.acr_registration]
 }
