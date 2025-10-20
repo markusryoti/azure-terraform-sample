@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=4.1.0"
+      version = "=4.49.0"
     }
   }
 }
@@ -34,7 +34,7 @@ module "containerapps_env" {
   source              = "../../modules/containerapps-env"
   resource_group_name = azurerm_resource_group.cloud_resources.name
   location            = azurerm_resource_group.cloud_resources.location
-  subnet_id           = module.network.backend_subnet_id
+  subnet_id           = module.network.container_apps_subnet_id
 }
 
 module "nginx_app" {

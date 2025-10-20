@@ -18,26 +18,17 @@ resource "azurerm_subnet" "subnet_public" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.cloud_network.name
 
-  # 10.0.0.0 - 10.0.7.255
-  address_prefixes = ["10.0.0.0/21"]
+  # 10.0.1.0 - 10.0.1.255
+  address_prefixes = ["10.0.1.0/24"]
 }
 
-# Public IP
-resource "azurerm_public_ip" "frontend_ip" {
-  name                = "public-ip"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
-
-resource "azurerm_subnet" "subnet_backend" {
-  name                 = "subnet-backend"
+resource "azurerm_subnet" "subnet_container_apps" {
+  name                 = "subnet-container-apps"
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.cloud_network.name
 
-  # 10.0.8.0 - 10.0.15.255
-  address_prefixes = ["10.0.8.0/21"]
+  # 10.0.2.0 - 10.0.3.255
+  address_prefixes = ["10.0.2.0/23"]
 
   delegation {
     name = "delegation"
@@ -46,6 +37,7 @@ resource "azurerm_subnet" "subnet_backend" {
       name = "Microsoft.App/environments"
       actions = [
         "Microsoft.Network/virtualNetworks/subnets/join/action",
+        # "Microsoft.Network/virtualNetworks/subnets/action",
       ]
     }
   }
@@ -68,8 +60,8 @@ resource "azurerm_nat_gateway" "natgw" {
   idle_timeout_in_minutes = 10
 }
 
-resource "azurerm_subnet_nat_gateway_association" "backend_nat_assoc" {
-  subnet_id      = azurerm_subnet.subnet_backend.id
+resource "azurerm_subnet_nat_gateway_association" "container_apps_nat_assoc" {
+  subnet_id      = azurerm_subnet.subnet_container_apps.id
   nat_gateway_id = azurerm_nat_gateway.natgw.id
 }
 
@@ -82,6 +74,6 @@ output "public_subnet_id" {
   value = azurerm_subnet.subnet_public.id
 }
 
-output "backend_subnet_id" {
-  value = azurerm_subnet.subnet_backend.id
+output "container_apps_subnet_id" {
+  value = azurerm_subnet.subnet_container_apps.id
 }

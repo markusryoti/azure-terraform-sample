@@ -40,8 +40,8 @@ resource "azurerm_network_security_group" "public_nsg" {
   }
 }
 
-resource "azurerm_network_security_group" "backend_nsg" {
-  name                = "nsg-backend"
+resource "azurerm_network_security_group" "container_apps_nsg" {
+  name                = "nsg-container-apps"
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -77,7 +77,7 @@ resource "azurerm_subnet_network_security_group_association" "frontend_assoc" {
   network_security_group_id = azurerm_network_security_group.public_nsg.id
 }
 
-resource "azurerm_subnet_network_security_group_association" "backend_assoc" {
-  subnet_id                 = azurerm_subnet.subnet_backend.id
-  network_security_group_id = azurerm_network_security_group.backend_nsg.id
+resource "azurerm_subnet_network_security_group_association" "container_apps_assoc" {
+  subnet_id                 = azurerm_subnet.subnet_container_apps.id
+  network_security_group_id = azurerm_network_security_group.container_apps_nsg.id
 }

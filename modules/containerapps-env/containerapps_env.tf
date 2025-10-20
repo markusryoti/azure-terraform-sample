@@ -7,7 +7,6 @@ resource "azurerm_container_app_environment" "container_apps_env" {
   location                 = var.location
   resource_group_name      = var.resource_group_name
   infrastructure_subnet_id = var.subnet_id
-  #   internal_load_balancer_enabled = true
 
   workload_profile {
     name                  = "Consumption"
