@@ -18,7 +18,7 @@ resource "azurerm_subnet" "subnet_public" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.cloud_network.name
 
-  # 10.0.1.0 - 10.0.1.255
+  # 10.0.1.0 - 10.0.1.255 (256 IP's)
   address_prefixes = ["10.0.1.0/24"]
 }
 
@@ -27,7 +27,7 @@ resource "azurerm_subnet" "subnet_container_apps" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.cloud_network.name
 
-  # 10.0.2.0 - 10.0.3.255
+  # 10.0.2.0 - 10.0.3.255 (512 IP's)
   address_prefixes = ["10.0.2.0/23"]
 
   delegation {
@@ -37,7 +37,6 @@ resource "azurerm_subnet" "subnet_container_apps" {
       name = "Microsoft.App/environments"
       actions = [
         "Microsoft.Network/virtualNetworks/subnets/join/action",
-        # "Microsoft.Network/virtualNetworks/subnets/action",
       ]
     }
   }
@@ -60,14 +59,14 @@ resource "azurerm_nat_gateway" "natgw" {
   idle_timeout_in_minutes = 10
 }
 
-resource "azurerm_subnet_nat_gateway_association" "container_apps_nat_assoc" {
-  subnet_id      = azurerm_subnet.subnet_container_apps.id
-  nat_gateway_id = azurerm_nat_gateway.natgw.id
-}
-
 resource "azurerm_nat_gateway_public_ip_association" "nat_public_ip_assoc" {
   nat_gateway_id       = azurerm_nat_gateway.natgw.id
   public_ip_address_id = azurerm_public_ip.nat_ip.id
+}
+
+resource "azurerm_subnet_nat_gateway_association" "container_apps_nat_assoc" {
+  subnet_id      = azurerm_subnet.subnet_container_apps.id
+  nat_gateway_id = azurerm_nat_gateway.natgw.id
 }
 
 output "public_subnet_id" {

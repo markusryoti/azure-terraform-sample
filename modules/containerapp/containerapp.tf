@@ -3,6 +3,7 @@ resource "azurerm_container_app" "nginx" {
   container_app_environment_id = var.capp_environment_id
   resource_group_name          = var.resource_group_name
   revision_mode                = "Single"
+  workload_profile_name        = "Consumption"
 
   template {
     container {

@@ -72,10 +72,10 @@ resource "azurerm_network_security_group" "container_apps_nsg" {
   }
 }
 
-resource "azurerm_subnet_network_security_group_association" "frontend_assoc" {
-  subnet_id                 = azurerm_subnet.subnet_public.id
-  network_security_group_id = azurerm_network_security_group.public_nsg.id
-}
+# resource "azurerm_subnet_network_security_group_association" "public_assoc" {
+#   subnet_id                 = azurerm_subnet.subnet_public.id
+#   network_security_group_id = azurerm_network_security_group.public_nsg.id
+# }
 
 resource "azurerm_subnet_network_security_group_association" "container_apps_assoc" {
   subnet_id                 = azurerm_subnet.subnet_container_apps.id
