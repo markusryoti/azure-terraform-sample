@@ -42,37 +42,23 @@ resource "azurerm_subnet" "subnet_container_apps" {
   }
 }
 
-# NAT
-resource "azurerm_public_ip" "nat_ip" {
-  name                = "nat-gateway-ip"
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
+resource "azurerm_subnet" "subnet_postgres" {
+  name                 = "subnet-postgres"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.cloud_network.name
 
-resource "azurerm_nat_gateway" "natgw" {
-  name                    = "nat-gateway"
-  location                = var.location
-  resource_group_name     = var.resource_group_name
-  sku_name                = "Standard"
-  idle_timeout_in_minutes = 10
-}
+  # 10.0.4.0 - 10.0.4.255 (256 IP's)
+  address_prefixes  = ["10.0.4.0/24"]
+  service_endpoints = ["Microsoft.Storage"]
 
-resource "azurerm_nat_gateway_public_ip_association" "nat_public_ip_assoc" {
-  nat_gateway_id       = azurerm_nat_gateway.natgw.id
-  public_ip_address_id = azurerm_public_ip.nat_ip.id
-}
+  delegation {
+    name = "fs"
 
-resource "azurerm_subnet_nat_gateway_association" "container_apps_nat_assoc" {
-  subnet_id      = azurerm_subnet.subnet_container_apps.id
-  nat_gateway_id = azurerm_nat_gateway.natgw.id
-}
-
-output "public_subnet_id" {
-  value = azurerm_subnet.subnet_public.id
-}
-
-output "container_apps_subnet_id" {
-  value = azurerm_subnet.subnet_container_apps.id
+    service_delegation {
+      name = "Microsoft.DBforPostgreSQL/flexibleServers"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+      ]
+    }
+  }
 }

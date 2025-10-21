@@ -1,5 +1,5 @@
 resource "azurerm_container_app" "nginx" {
-  name                         = "nginx-app"
+  name                         = var.app_name
   container_app_environment_id = var.capp_environment_id
   resource_group_name          = var.resource_group_name
   revision_mode                = "Single"
@@ -7,16 +7,16 @@ resource "azurerm_container_app" "nginx" {
 
   template {
     container {
-      name   = "nginx-container"
-      image  = "docker.io/nginx:latest"
+      name   = var.container_name
+      image  = var.image_name
       cpu    = 0.25
       memory = "0.5Gi"
     }
   }
 
   ingress {
-    external_enabled = true
-    target_port      = 80
+    external_enabled = var.public_ingress
+    target_port      = var.container_port
 
     traffic_weight {
       latest_revision = true
