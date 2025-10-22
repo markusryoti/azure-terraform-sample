@@ -85,3 +85,10 @@ module "postgres" {
 
   depends_on = [module.network.postgres_private_dns_zone_link_id]
 }
+
+module "storage" {
+  source               = "../../modules/storage"
+  storage_account_name = "markusryotiexmplstorage"
+  resource_group_name  = azurerm_resource_group.rg_storage.name
+  location             = azurerm_resource_group.rg_storage.location
+}
