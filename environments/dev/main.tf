@@ -13,33 +13,37 @@ provider "azurerm" {
   features {}
 }
 
-resource "azurerm_resource_group" "cloud_resources" {
-  name     = "cloud-resources"
+resource "azurerm_resource_group" "rg_network" {
+  name     = "rg-network"
   location = "North Europe"
-}
-
-# To help export Terraform templates from portal
-# Not sure if it works as intended
-resource "azurerm_resource_provider_registration" "azureterraform" {
-  name = "Microsoft.AzureTerraform"
 }
 
 module "network" {
   source              = "../../modules/network"
-  resource_group_name = azurerm_resource_group.cloud_resources.name
-  location            = azurerm_resource_group.cloud_resources.location
+  resource_group_name = azurerm_resource_group.rg_network.name
+  location            = azurerm_resource_group.rg_network.location
+}
+
+resource "azurerm_resource_group" "rg_acr" {
+  name     = "rg-acr"
+  location = "North Europe"
 }
 
 module "acr" {
   source              = "../../modules/acr"
-  resource_group_name = azurerm_resource_group.cloud_resources.name
-  location            = azurerm_resource_group.cloud_resources.location
+  resource_group_name = azurerm_resource_group.rg_acr.name
+  location            = azurerm_resource_group.rg_acr.location
+}
+
+resource "azurerm_resource_group" "rg_compute" {
+  name     = "rg-compute"
+  location = "North Europe"
 }
 
 module "containerapps_env" {
   source              = "../../modules/containerapps-env"
-  resource_group_name = azurerm_resource_group.cloud_resources.name
-  location            = azurerm_resource_group.cloud_resources.location
+  resource_group_name = azurerm_resource_group.rg_compute.name
+  location            = azurerm_resource_group.rg_compute.location
   subnet_id           = module.network.container_apps_subnet_id
 }
 
@@ -51,7 +55,7 @@ module "frontend" {
   public_ingress      = true
   container_port      = 80
   capp_environment_id = module.containerapps_env.container_apps_env_id
-  resource_group_name = azurerm_resource_group.cloud_resources.name
+  resource_group_name = azurerm_resource_group.rg_compute.name
 }
 
 module "backend" {
@@ -62,15 +66,20 @@ module "backend" {
   public_ingress      = true
   container_port      = 80
   capp_environment_id = module.containerapps_env.container_apps_env_id
-  resource_group_name = azurerm_resource_group.cloud_resources.name
+  resource_group_name = azurerm_resource_group.rg_compute.name
+}
+
+resource "azurerm_resource_group" "rg_storage" {
+  name     = "rg-storage"
+  location = "North Europe"
 }
 
 module "postgres" {
   source               = "../../modules/postgres"
   database_server_name = "markusryoti-example-psql-db"
   database_name        = "exampledb"
-  resource_group_name  = azurerm_resource_group.cloud_resources.name
-  location             = azurerm_resource_group.cloud_resources.location
+  resource_group_name  = azurerm_resource_group.rg_storage.name
+  location             = azurerm_resource_group.rg_storage.location
   subnet_id            = module.network.postgres_subnet_id
   private_dns_zone_id  = module.network.postgres_private_dns_zone_id
 
