@@ -65,12 +65,14 @@ module "backend" {
   resource_group_name = azurerm_resource_group.cloud_resources.name
 }
 
-# module "postgres" {
-#   source               = "../../modules/postgres"
-#   database_server_name = "markusryoti-example-psql-db"
-#   database_name        = "exampledb"
-#   resource_group_name  = azurerm_resource_group.cloud_resources.name
-#   location             = azurerm_resource_group.cloud_resources.location
-#   subnet_id            = module.network.postgres_subnet_id
-#   private_dns_zone_id  = module.network.postgres_private_dns_zone_id
-# }
+module "postgres" {
+  source               = "../../modules/postgres"
+  database_server_name = "markusryoti-example-psql-db"
+  database_name        = "exampledb"
+  resource_group_name  = azurerm_resource_group.cloud_resources.name
+  location             = azurerm_resource_group.cloud_resources.location
+  subnet_id            = module.network.postgres_subnet_id
+  private_dns_zone_id  = module.network.postgres_private_dns_zone_id
+
+  depends_on = [module.network.postgres_private_dns_zone_link_id]
+}
